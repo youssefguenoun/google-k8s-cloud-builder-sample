@@ -1,0 +1,33 @@
+steps:
+
+  #
+  # Cloning the cookbook source project
+  #
+
+- id: github-clone
+  name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://source.developers.google.com/p/jupyterhub-research-database/r/echosens-mfs']
+
+
+  #
+  # Setting-up authentication and deploy GCP/GKE
+  #
+- id: perform-gcp-authentication
+  name: 'gcr.io/cloud-builders/gsutil'
+  entrypoint: 'bash'
+  args: ['./scripts/authenticate.sh']
+  waitFor:
+    - github-clone
+
+  #
+  # Deploying
+  #
+
+- id: deploy-to-gke
+  name: 'gcr.io/cloud-builders/kubectl'
+  args: ['apply', '-f', 'k8s/core']
+  waitFor:
+    - perform-gcp-authentication
+#  env:
+#  - 'CLOUDSDK_COMPUTE_ZONE=europe-west1-b'
+#  - 'CLOUDSDK_CONTAINER_CLUSTER=echosens-k8s-cluster-dev'

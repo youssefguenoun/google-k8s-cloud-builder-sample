@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ms-mfs
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: ms-mfs
+        visualize: "true"
+        version: v1
+    spec:
+      #volumes:
+       # - name: google-cloud-key
+        #  secret:
+         #   secretName: ms-mfs-key
+      containers:
+      - name: ms-mfs
+        image: gcr.io/jupyterhub-research-database/ms-mfs:1.6.12-SNAPSHOT
+        imagePullPolicy: Always #IfNotPresent
+        ports:
+        - containerPort: 80
+        #volumeMounts:
+         # - mountPath: /var/secrets/google
+          #  name: google-cloud-key
+        env:
+        - name: PORT
+          value: "80"
+        #- name: GOOGLE_APPLICATION_CREDENTIALS
+         # value: /var/secrets/google/key.json
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 10 # default is 10s
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
